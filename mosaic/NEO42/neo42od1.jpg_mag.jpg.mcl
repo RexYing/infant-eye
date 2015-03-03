@@ -1,0 +1,11 @@
+ObjectType = Scene
+NDims = 2
+NObjects = 1
+ObjectType = Ellipse
+NDims = 2
+BinaryData = False
+TransformMatrix = 1 0 0 1
+Offset = 255.306 254.096
+CenterOfRotation = 0 0
+ElementSpacing = 1 1
+Radius = 231.569 231.569
