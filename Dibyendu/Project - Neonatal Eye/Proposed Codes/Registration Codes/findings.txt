@@ -1,0 +1,8 @@
+Use Hough circle detection before registration to mask only the pupil
+
+Registration continues till a break
+after that a new registration begins
+
+a registered group can be merged based on filter response
+
+multiple merged group can be formed - possibility for mosaic

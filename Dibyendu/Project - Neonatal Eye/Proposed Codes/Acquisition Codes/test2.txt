@@ -1,0 +1,33 @@
+%% k-means
+nFrames = 990;
+img = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',1));
+img = imresize(img,0.25);
+imSize = size(img);
+dataSize = [imSize(1)*imSize(2),imSize(3)];
+h2 = strel('disk',3);
+h1 = figure();
+hh = fspecial('sobel');
+data = zeros(dataSize);
+img2 = img;
+k = 2;
+for cf = 1:nFrames
+    img = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',cf));
+    img = imresize(img,0.25);
+    for l = 1:imSize(3)
+        tmp = img(:,:,l);
+        data(:,l) = tmp(:);
+    end
+    [idx,c] = kmeans(data,k);
+    data2 = data;
+    for ck = 1:k
+        indx = idx==ck;
+        data2(indx,:) = repmat(c(ck,:),[sum(indx),1]);
+    end
+    for l = 1:imSize(3)
+        tmp = data2(:,l);
+        img2(:,:,l) = reshape(tmp,[imSize(1),imSize(2)]);
+    end
+    figure(h1),subplot(1,2,1);imshow(img);
+    figure(h1),subplot(1,2,2);imshow(img2);
+%     pause(0.01);
+end

@@ -1,0 +1,66 @@
+%%
+dir1 = 'I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Proposed Codes/Acquisition Codes/selectedFrames/2';
+dir2 = 'I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Proposed Codes/Acquisition Codes/selectedFrames/op';
+nscale          = 4;
+norient         = 12;
+minWaveLength   = 3;
+mult            = 1.7;
+sigmaOnf        = 0.65;
+dThetaOnSigma   = 0.2;
+Lnorm            = 0;
+feedback = 1;
+opt = option_defaults;
+a = dir([dir1,'/']);
+len = length(a);
+[optimizer, metric]  = imregconfig('multimodal');
+refImg = imread([dir1,'/',a(3).name]);
+% Gref = filter_image(refImg,opt);
+[EO, BP] = gaborconvolve(refImg,  nscale, norient, minWaveLength, mult, sigmaOnf, dThetaOnSigma, Lnorm, feedback);
+sizeEO = size(EO);
+tG = zeros(size(refImg,1),size(refImg,2),sizeEO(1)*sizeEO(2));
+cnt = 1;
+for r = 1:sizeEO(1)
+    for c = 1:sizeEO(2)
+        tG(:,:,cnt) = EO{r,c};
+        cnt = cnt + 1;
+    end
+end
+tGm = max(tG,[],3);
+Gref = angle(tGm);
+GtargPrev = Gref;
+imwrite(mat2gray(Gref),sprintf('%s/%06d.png',dir2,1));
+
+grp = 1;
+imgCnt = 1;
+for ca = 4:len
+    ca
+    targImg = imread([dir1,'/',a(ca).name]);
+%     Gtarg = filter_image(targImg,opt);
+    [EO, BP] = gaborconvolve(targImg,  nscale, norient, minWaveLength, mult, sigmaOnf, dThetaOnSigma, Lnorm, feedback);
+    lastwarn('');
+    sizeEO = size(EO);
+    tG = zeros(size(targImg,1),size(targImg,2),sizeEO(1)*sizeEO(2));
+    cnt = 1;
+    for r = 1:sizeEO(1)
+        for c = 1:sizeEO(2)
+            tG(:,:,cnt) = EO{r,c};
+            cnt = cnt + 1;
+        end
+    end
+    tGm = max(tG,[],3);
+    Gtarg = angle(tGm);
+    %     combImg = Register2(Gref,Gtarg);
+    try
+        movingRegistered = imregister(Gtarg,GtargPrev,'affine',optimizer, metric);
+        error(lastwarn)
+        GtargPrev = movingRegistered;
+%     movingRegistered = imregister(movingRegistered,Gref,'affine',optimizer, metric);
+        imwrite(mat2gray(movingRegistered),sprintf('%s/Grp%03d_img%06d.png',dir2,grp,imgCnt));
+        imgCnt = imgCnt + 1;
+    catch ME
+        fprintf('frame %d not done. Considering new group\n',ca-2);
+        GtargPrev = Gtarg;
+        grp = grp + 1;
+        imgCnt = 1;
+    end
+end

@@ -1,0 +1,33 @@
+%%
+dir1 = 'I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Proposed Codes/Acquisition Codes/selectedFrames/2';
+dir2 = 'I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Proposed Codes/Acquisition Codes/selectedFrames/op';
+opt = option_defaults;
+a = dir([dir1,'/']);
+len = length(a);
+[optimizer, metric]  = imregconfig('multimodal');
+refImg = imread([dir1,'/',a(3).name]);
+Gref = filter_image(refImg,opt);
+GtargPrev = Gref;
+imwrite(mat2gray(Gref),sprintf('%s/%06d.png',dir2,1));
+grp = 1;
+imgCnt = 1;
+for ca = 4:len
+    ca
+    lastwarn('');
+    targImg = imread([dir1,'/',a(ca).name]);
+    Gtarg = filter_image(targImg,opt);
+%     combImg = Register2(Gref,Gtarg);
+    try
+        movingRegistered = imregister(Gtarg,GtargPrev,'affine',optimizer, metric);
+        error(lastwarn)
+        GtargPrev = movingRegistered;
+%     movingRegistered = imregister(movingRegistered,Gref,'affine',optimizer, metric);
+        imwrite(mat2gray(movingRegistered),sprintf('%s/Grp%03d_img%06d.png',dir2,grp,imgCnt));
+        imgCnt = imgCnt + 1;
+    catch ME
+        fprintf('frame %d not done. Considering new group\n',ca-2);
+        GtargPrev = Gtarg;
+        grp = grp + 1;
+        imgCnt = 1;
+    end
+end

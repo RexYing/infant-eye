@@ -1,0 +1,92 @@
+%% k-means + hsv correction + bwlabel based rectangle
+nFrames = 990;
+gap = 4;
+img = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',1));
+img = imresize(img,0.25);
+imSizeOrig = size(img);
+img = img(gap:imSizeOrig(1)-gap,gap:imSizeOrig(2)-gap,:);
+imSize = size(img);
+dataSize = [imSize(1)*imSize(2),imSize(3)];
+rowmat = repmat([1:imSize(1)]',[1,imSize(2)]);
+colmat = repmat([1:imSize(2)],[imSize(1),1]);
+h2 = strel('disk',3);
+h1 = figure();
+hh = fspecial('sobel');
+data = zeros(dataSize);
+datahsv = zeros(dataSize);
+img2 = img;
+k = 2;
+
+for cf = 288:nFrames
+    img = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',cf));
+    img = imresize(img,0.25);
+    img = img(gap:imSizeOrig(1)-gap,gap:imSizeOrig(2)-gap,:);
+    
+    %preprocessing
+    imghsv = rgb2hsv(img);
+    for l = 1:imSize(3)
+        tmp = imghsv(:,:,l);
+        datahsv(:,l) = tmp(:);
+    end
+    meanhsv = mean(datahsv);
+    indx = datahsv(:,2)<0.2;
+    datahsv(indx,2) = meanhsv(2);
+    indx2 = datahsv(indx,3)>0.9;
+    datahsv2 = datahsv(indx,:);
+    datahsv2(indx2,3) = meanhsv(3);
+    datahsv(indx,:) = datahsv2;
+    for l = 1:imSize(3)
+        tmp = datahsv(:,l);
+        imghsv(:,:,l) = reshape(tmp,[imSize(1),imSize(2)]);
+    end
+    imgn = hsv2rgb(imghsv);
+    for l = 1:imSize(3)
+        tmp = imgn(:,:,l);
+        data(:,l) = tmp(:);
+    end
+    
+    %segmentation
+    notConverged = 1;
+    while notConverged
+        try
+        [idx,c] = kmeans(data,k);
+        notConverged = 0;
+        catch ME
+            % do nothing
+        end
+    end
+    data2 = data;
+    for ck = 1:k
+        indx = idx==ck;
+        data2(indx,:) = repmat(c(ck,:),[sum(indx),1]);
+    end
+    for l = 1:imSize(3)
+        tmp = data2(:,l);
+        img2(:,:,l) = reshape(tmp,[imSize(1),imSize(2)]);
+    end
+    
+    [~,cm] = min(sum(c,2)); %blackish
+    imgb = reshape(idx==cm,[imSize(1),imSize(2)]);
+    [L,n] = bwlabel(imgb);
+    probEyeLocs = [];
+    for nc = 1:n
+        tmp = L==nc;
+        top = min(rowmat(tmp));
+        bottom = max(rowmat(tmp));
+        left = min(colmat(tmp));
+        right = max(colmat(tmp));
+        locSize = (bottom-top)*(right-left);
+        flag = (top==1) + (bottom==imSize(1)) + (left==1) + (right==imSize(2));
+        if (locSize>(dataSize(1)/100)) && (flag<3) % at least 1/10th and not outside regions
+            probEyeLocs = [probEyeLocs;top,bottom,left,right];
+        end
+    end
+    
+    figure(h1),subplot(2,2,1);imshow(img);
+    figure(h1),subplot(2,2,2);imshow(uint8(img2*255));
+    hold on
+    rectangle('Position',[probEyeLocs(1,3),probEyeLocs(1,1),probEyeLocs(1,4)-probEyeLocs(1,3),probEyeLocs(1,2)-probEyeLocs(1,1)]);
+    hold off
+    figure(h1),subplot(2,2,3:4);imshow(img(probEyeLocs(1,1):probEyeLocs(1,2),probEyeLocs(1,3):probEyeLocs(1,4),:));
+%     pause(0.01);
+end

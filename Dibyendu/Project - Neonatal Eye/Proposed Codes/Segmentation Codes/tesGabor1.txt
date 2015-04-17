@@ -1,0 +1,24 @@
+%%
+nscale          = 4;
+norient         = 6;
+minWaveLength   = 3;
+mult            = 1.7;
+sigmaOnf        = 0.65;
+dThetaOnSigma   = 0.2;
+Lnorm            = 0;
+feedback = 1;
+
+[EO, BP] = gaborconvolve(img,  nscale, norient, minWaveLength, mult, sigmaOnf, dThetaOnSigma, Lnorm, feedback);
+
+
+sizeEO = size(EO);
+tG = zeros(size(img,1),size(img,2),sizeEO(1)*sizeEO(2));
+cnt = 1;
+for r = 1:sizeEO(1)
+    for c = 1:sizeEO(2)
+        tG(:,:,cnt) = EO{r,c};
+	cnt = cnt + 1;
+    end
+end
+tGm = max(tG,[],3);
+figure,imshow(angle(tGm),[])

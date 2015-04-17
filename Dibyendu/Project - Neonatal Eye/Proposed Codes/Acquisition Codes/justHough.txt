@@ -1,0 +1,59 @@
+%% k-means + hsv correction + bwlabel based rectangle
+nFrames = 990;
+gap = 12;
+img = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',1));
+img = imresize(img,0.25);
+imSizeOrig = size(img);
+img = img(gap:imSizeOrig(1)-gap,gap:imSizeOrig(2)-gap,:);
+imSize = size(img);
+dataSize = [imSize(1)*imSize(2),imSize(3)];
+rowmat = repmat([1:imSize(1)]',[1,imSize(2)]);
+colmat = repmat([1:imSize(2)],[imSize(1),1]);
+h2 = strel('disk',3);
+hh = fspecial('sobel');
+data = zeros(dataSize);
+datahsv = zeros(dataSize);
+img2 = img;
+k = 2;
+radii = 15:1:40;
+radiiGap = 6;
+fc = 0;
+blankImg = uint8(255*ones(255,255));
+thresh = 2.5;
+for cf = 1:nFrames
+    imgo = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',cf));
+    img = imresize(imgo,0.25);
+    img = img(gap:imSizeOrig(1)-gap,gap:imSizeOrig(2)-gap,:);
+    
+    im = rgb2gray(img);
+    tSize = size(img);
+    e = edge(im, 'canny');
+    h = circle_hough(e, radii, 'same', 'normalise');
+    peak = circle_houghpeaks(h, radii, 'nhoodxy', 15, 'nhoodr', 21, 'npeaks', 1,'Threshold',thresh);
+    
+    if ~isempty(peak)
+        [x, y] = circlepoints(peak(3)+radiiGap); % take more location
+        currX = x+peak(1);
+        currY = y+peak(2);
+        
+        flag = (min(currY)>=1) + (max(currY)<=tSize(1)) + (min(currX)>=1) + (max(currX)<=tSize(2));
+        if flag==4
+            imSize = size(imgo);
+            Ym = min(currY)*imSize(1)/tSize(1);
+            YM = max(currY)*imSize(1)/tSize(1);
+            Xm = min(currX)*imSize(2)/tSize(2);
+            XM = max(currX)*imSize(2)/tSize(2);
+            if YM>imSize(1)
+                YM = imSize(1);
+            end
+            if XM>imSize(2)
+                XM = imSize(2);
+            end
+            selectedRegion = imgo(Ym:YM,Xm:XM,:);
+            imwrite(selectedRegion,sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/selectedFrames2/in%06dfromFrame%06d.png',fc,cf));
+            fc = fc + 1;
+        end
+    end
+    cf
+    %     pause(0.01);
+end
