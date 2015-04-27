@@ -1,0 +1,130 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>Circular Hough Transform Demonstration</title><meta name="generator" content="MATLAB 7.10"><meta name="date" content="2010-03-19"><meta name="m-file" content="circle_houghdemo"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>Circular Hough Transform Demonstration</h1><!--introduction--><p>David Young</p><p>Demonstrates the use of <tt>circle_hough</tt> and <tt>circle_houghpeaks</tt> to find circular objects in an image.</p><p>Uses the Image Processing Toolbox</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Setup</a></li><li><a href="#2">Carry out the HT</a></li><li><a href="#3">Find some peaks in the accumulator</a></li><li><a href="#4">Look at the results</a></li></ul></div><h2>Setup<a name="1"></a></h2><p>Reads an example image, gets its edges and displays them</p><pre class="codeinput">im = imread(<span class="string">'coins.png'</span>);
+e = edge(im, <span class="string">'canny'</span>);
+imshow(e);
+</pre><img vspace="5" hspace="5" src="circle_houghdemo_01.png" alt=""> <h2>Carry out the HT<a name="2"></a></h2><p>The circles round the coins have radii in the 20-30 pixels range. To make sure we cover the range, we search radii from 15 to 40 pixels, in steps of 1 pixel.</p><p>We select the 'same' option to simplify later processing, and the 'normalise' option to avoid a bias towards finding larger circles.</p><pre class="codeinput">radii = 15:1:40;
+h = circle_hough(e, radii, <span class="string">'same'</span>, <span class="string">'normalise'</span>);
+</pre><h2>Find some peaks in the accumulator<a name="3"></a></h2><p>We use the neighbourhood-suppression method of peak finding to ensure that we find spatially separated circles. We select the 10 most prominent peaks, because as it happens we can see that there are 10 coins to find.</p><pre class="codeinput">peaks = circle_houghpeaks(h, radii, <span class="string">'nhoodxy'</span>, 15, <span class="string">'nhoodr'</span>, 21, <span class="string">'npeaks'</span>, 10);
+</pre><h2>Look at the results<a name="4"></a></h2><p>We draw the circles found on the image, using both the positions and the radii stored in the <tt>peaks</tt> array. The <tt>circlepoints</tt> function is convenient for this - it is also used by <tt>circle_hough</tt> so comes with it.</p><pre class="codeinput">imshow(im);
+hold <span class="string">on</span>;
+<span class="keyword">for</span> peak = peaks
+    [x, y] = circlepoints(peak(3));
+    plot(x+peak(1), y+peak(2), <span class="string">'g-'</span>);
+<span class="keyword">end</span>
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="circle_houghdemo_02.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.10<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Circular Hough Transform Demonstration
+%
+% David Young
+%
+% Demonstrates the use of |circle_hough| and |circle_houghpeaks| to find
+% circular objects in an image.
+%
+% Uses the Image Processing Toolbox
+
+%% Setup
+% Reads an example image, gets its edges and displays them
+
+im = imread('coins.png');
+e = edge(im, 'canny');
+imshow(e);
+
+%% Carry out the HT
+% The circles round the coins have radii in the 20-30 pixels range. To make
+% sure we cover the range, we search radii from 15 to 40 pixels, in steps
+% of 1 pixel.
+%
+% We select the 'same' option to simplify later processing, and the
+% 'normalise' option to avoid a bias towards finding larger circles.
+
+radii = 15:1:40;
+h = circle_hough(e, radii, 'same', 'normalise');
+
+
+%% Find some peaks in the accumulator
+% We use the neighbourhood-suppression method of peak finding to ensure
+% that we find spatially separated circles. We select the 10 most prominent
+% peaks, because as it happens we can see that there are 10 coins to find.
+
+peaks = circle_houghpeaks(h, radii, 'nhoodxy', 15, 'nhoodr', 21, 'npeaks', 10);
+
+%% Look at the results
+% We draw the circles found on the image, using both the positions and the
+% radii stored in the |peaks| array. The |circlepoints| function is
+% convenient for this - it is also used by |circle_hough| so comes with it.
+
+imshow(im);
+hold on;
+for peak = peaks
+    [x, y] = circlepoints(peak(3));
+    plot(x+peak(1), y+peak(2), 'g-');
+end
+hold off
+
+##### SOURCE END #####
+--></body></html>

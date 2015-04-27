@@ -1,0 +1,13 @@
+dir1 = 'data_orig';
+dir2 = 'data_sup';
+a = dir([dir1,'/']);
+len = length(a);
+
+opt = option_defaults;
+for cf = 3:len
+    im1=imread([dir1,'/',a(cf).name]);
+    Gtarg = filter_image(im1,opt);
+    img2 = double(mat2gray(rgb2gray(im1)))+Gtarg;
+%     imshow(mat2gray(img2))
+    imwrite(mat2gray(img2),sprintf('%s/%05d.png',dir2,cf-3));
+end

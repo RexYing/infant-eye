@@ -1,0 +1,37 @@
+%%
+img2 = rgb2gray(img);
+LL = zeros(size(img,1),size(img,2),length(0.1:0.1:0.9));
+cnt = 1;
+for sig = 0.5:0.1:1.5
+    h = fspecial('log', [5 5], sig) ;
+    LL(:,:,cnt) = imfilter(img2,h);
+    cnt = cnt + 1;
+end
+L = max(LL,[],3);
+figure,imshow(img)
+figure,imshow(L,[])
+
+
+nscale          = 4;
+norient         = 6;
+minWaveLength   = 3;
+mult            = 1.7;
+sigmaOnf        = 0.65;
+dThetaOnSigma   = 1.3;
+Lnorm            = 0;
+feedback = 1;
+
+[EO, BP] = gaborconvolve(L,  nscale, norient, minWaveLength, mult, sigmaOnf, dThetaOnSigma, Lnorm, feedback);
+
+
+sizeEO = size(EO);
+tG = zeros(size(img,1),size(img,2),sizeEO(1)*sizeEO(2));
+cnt = 1;
+for r = 1:sizeEO(1)
+    for c = 1:sizeEO(2)
+        tG(:,:,cnt) = EO{r,c};
+        cnt = cnt + 1;
+    end
+end
+tGm = max(tG,[],3)
+figure,imshow(angle(tGm),[])

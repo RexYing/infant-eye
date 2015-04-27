@@ -1,0 +1,23 @@
+%%
+nFrames = 990;
+img = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',1));
+img = imresize(img,0.25);
+imSize = size(img);
+h2 = strel('disk',3);
+h1 = figure();
+for cf = 1:nFrames
+    img = imread(sprintf('E:/Papers/After PhD/From Sina/Project - Neonatal Eye/Dataset/1/in%06d.png',cf));
+    img = imresize(img,0.25);
+    a1 = conv2(double(img(:,:,1)),[-1,1],'same');
+    a2 = conv2(double(img(:,:,1)),[-1,1]','same');
+    a3 = conv2(double(img(:,:,1)),[1,-1],'same');
+    a4 = conv2(double(img(:,:,1)),[1,-1]','same');
+    a13 = abs(a1) + abs(a3);
+    a24 = abs(a2) + abs(a4);
+    at = sqrt(a13.^2+a24.^2)>10;
+    atf = imfill(at,'holes');
+    atfo = imopen(atf,h2);
+    figure(h1),subplot(1,2,1);imshow(img);
+    figure(h1),subplot(1,2,2);imshow(atfo);
+%     pause(0.01);
+end

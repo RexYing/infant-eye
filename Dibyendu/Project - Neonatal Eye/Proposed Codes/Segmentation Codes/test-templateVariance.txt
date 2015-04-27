@@ -1,0 +1,19 @@
+%%
+imSize = size(img);
+winSize = 25;
+halfWinSize = (winSize-1)/2;
+T = 1;
+outImg = false(imSize(1),imSize(2));
+for r = halfWinSize+1:imSize(1)-halfWinSize
+    for c = halfWinSize+1:imSize(2)-halfWinSize
+        t = img(r-halfWinSize:r+halfWinSize,c-halfWinSize:c+halfWinSize,:);
+        meanT = squeeze(mean(mean(t,2),1));
+        for ch = 1:3
+            tt = double(t(:,:,ch));
+            varT(ch) = sqrt(var(tt(:)));
+        end
+        outImg(r-halfWinSize:r+halfWinSize,c-halfWinSize:c+halfWinSize) = (abs(t(:,:,1)-meanT(1))<T*varT(1)) & (abs(t(:,:,2)-meanT(2))<T*varT(2)) & (abs(t(:,:,3)-meanT(3))<T*varT(3));
+    end
+end
+figure,imshow(img);
+figure,imshow(outImg);
