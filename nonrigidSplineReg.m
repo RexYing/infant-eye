@@ -47,7 +47,10 @@ Igrid=make_grid_image(Spacing,size(I1));
 [Igrid, T]=bspline_transform(O_trans,Igrid,Spacing); 
 
 % Show the registration results
-figure,
+figure
+% subplot(2,2,1), imshow(I1); title('input image 1');
+% subplot(2,2,2), imshow(I2); title('input image 2');
+% subplot(2,2,3), imshow(Icor); title('transformed image 1');
 subplot(2,2,1), imshow(uint8(I1), [0, 255]); title('input image 1');
 subplot(2,2,2), imshow(uint8(I2), [0, 255]); title('input image 2');
 subplot(2,2,3), imshow(uint8(Icor), [0, 255]); title('transformed image 1');

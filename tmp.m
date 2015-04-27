@@ -6,3 +6,4 @@ er = er .* mask;
 Fs = 0.1;
 sigma = 3;
 gaborFilter(base(:, :, 1), Fs, sigma);
+colormap gray
