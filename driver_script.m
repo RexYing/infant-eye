@@ -50,17 +50,17 @@ bwframe = rgb2gray(frame);
 % colormap gray
 % title('Fourier transform of best frame');
 
-figure
-F = fftshift(fft2(rgb2gray(eyeregion)));
-magnitude = abs(F);
-imagesc(log(1 + magnitude));
-colorbar
-colormap gray
-title('Fourier transform of eye region');
+% figure
+% F = fftshift(fft2(rgb2gray(eyeregion)));
+% magnitude = abs(F);
+% imagesc(log(1 + magnitude));
+% colorbar
+% colormap gray
+% title('Fourier transform of eye region');
 
 % out of focus
 % figure
-oofFrame = read(movObj, 700); %imshow(oofFrame(504: 925, 370:718))
+% oofFrame = read(movObj, 700); %imshow(oofFrame(504: 925, 370:718))
 % imshow(oofFrame);
 % F = fftshift(fft2( rgb2gray(oofFrame)));
 % magnitude = abs(F);
@@ -69,13 +69,13 @@ oofFrame = read(movObj, 700); %imshow(oofFrame(504: 925, 370:718))
 % colormap gray
 % title('Fourier transform of out of focus frame');
 
-figure
-F = fftshift(fft2(rgb2gray(oofFrame(343: 575, 674: 929, :))));
-magnitude = abs(F);
-imagesc(log(1 + magnitude));
-colorbar
-colormap gray
-title('Fourier transform of out of focus eye region');
+% figure
+% F = fftshift(fft2(rgb2gray(oofFrame(343: 575, 674: 929, :))));
+% magnitude = abs(F);
+% imagesc(log(1 + magnitude));
+% colorbar
+% colormap gray
+% title('Fourier transform of out of focus eye region');
 
 %% Motion
 % frame1 = read(movObj, 376);

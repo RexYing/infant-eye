@@ -58,12 +58,12 @@ imshow(uint8(base));
 
 for i = 2: length(bestFrames)
     frame = squeeze(stack(i, :, :, :));
-%     registered = imregister(frame(:, :, 1), base(:, :, 1), 'affine', optimizer, metric);
-%     imshow(registered, [0, 255]);
-%     drawnow;
-%     pause(0.5);
+    registered = imregister(frame(:, :, 1), base(:, :, 1), 'affine', optimizer, metric);
+    imshow(registered, [0, 255]);
+    drawnow;
+    pause(0.5);
     
-    nonrigidSplineReg(frame(:, :, 1), base(:, :, 1));
+%     nonrigidSplineReg(frame(:, :, 1), base(:, :, 1));
     
 %     imshowpair(frame(:, :, 1), base(:, :, 1));
 %     figure
