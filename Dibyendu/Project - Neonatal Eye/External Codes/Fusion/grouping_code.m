@@ -1,7 +1,11 @@
-%% k-means + hsv correction + bwlabel based rectangle
-dir2 = 'I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Proposed Codes/Acquisition Codes/selectedFrames/op2';
+%% Groups frames that are similar
+
+dir2 = 'data/output';
 nFrames = 990;
 gap = 12;
+
+dsFactor = 0.25;
+
 load(sprintf('I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Datasets/Initial Dataset/video/mat/in%06d.mat',1));
 img = imresize(img,0.25);
 imSizeOrig = size(img);
@@ -24,13 +28,21 @@ blankImg = uint8(255*ones(255,255));
 thresh = 2.5;
 
 
+%% grouping k-means + hsv correction + bwlabel based rectangle
+% Frame data includes:
+%   stack: [n-by-width-by-height-by-3] matrix of frame data
+%   fWidth, fHeight: width and height of each frame
+%   nFrames: number of frames stored
+%load frame_data.mat;
+
 grp = 1;
 imgCnt = 1;
 opt = option_defaults;
 [optimizer, metric]  = imregconfig('multimodal');
 prevcf = 0;
 for cf = 290:nFrames
-    load(sprintf('I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Datasets/Initial Dataset/video/mat/in%06d.mat',cf));
+    %load(sprintf('I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Datasets/Initial Dataset/video/mat/in%06d.mat',cf));
+    img = squeeze(stack(cf, :, :, :));
     imgo = img;
     img = imresize(imgo,0.25);
     img = img(gap:imSizeOrig(1)-gap,gap:imSizeOrig(2)-gap,:);
