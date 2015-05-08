@@ -3,6 +3,6 @@ Use Hough circle detection before registration to mask only the pupil -- done
 Registration continues till a break -- done
 after that a new registration begins -- done
 
-a registered group can be merged based on filter response
+a registered group can be merged based on filter response -- done
 
-multiple merged group can be formed - possibility for mosaic
+multiple merged group can be formed - possibility for mosaic -- working on
