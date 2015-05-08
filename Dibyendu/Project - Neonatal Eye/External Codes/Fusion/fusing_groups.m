@@ -6,8 +6,10 @@ addpath(genpath('nsct_toolbox'));
 
 load('sparsefusion/Dictionary/D_100000_256_8.mat');
 
-dir1 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/op';
-dir2 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/fused';
+%dir1 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/op';
+%dir2 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/fused';
+dir1 = 'op';
+dir2 = 'fused1';
 a = dir([dir1,'/*.png']);
 len = length(a);
 overlap = 6;
@@ -37,7 +39,12 @@ for cf = 1:len
         
         
         tic;
-        imgf = lp_sr_fuse(img1,img2,level,3,3,D,overlap,epsilon);      %LP-SR
+%         [h1, w1] = size(img1);
+%         [h2, w2] = size(img2);
+%         h = min([h1, h2]);
+%         w = min([w1, w2]);
+       % imgf = wfusimg(img1, img2, 'sym4',5,'max','max');
+       imgf = lp_sr_fuse(img1,img2,level,3,3,D,overlap,epsilon);      %LP-SR
         %imgf = rp_sr_fuse(img1,img2,level,3,3,D,overlap,epsilon);     %RP-SR
         %imgf = dwt_sr_fuse(img1,img2,level,D,overlap,epsilon);        %DWT-SR
         %imgf = dtcwt_sr_fuse(img1,img2,level,D,overlap,epsilon);      %DTCWT-SR

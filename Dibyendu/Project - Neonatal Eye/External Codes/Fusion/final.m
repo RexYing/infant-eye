@@ -6,8 +6,10 @@ addpath(genpath('nsct_toolbox'));
 
 load('sparsefusion/Dictionary/D_100000_256_8.mat');
 
-dir1 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/fused_reg';
-dir2 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/fused_reg';
+% dir1 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/fused_reg';
+% dir2 = 'I:/Postdoctoral Works/Image Registration/Siftflow/SIFT-Flow/fused_reg';
+dir1 = '../fused_reg1';
+dir2 = '../fused_reg1';
 a = dir([dir1,'/*.png']);
 len = length(a);
 overlap = 6;
@@ -31,6 +33,7 @@ for cf = 1:len
         
         
         tic;
+        %imgf = wfusimg(img1, img2, 'sym4',5,'max','max');
         imgf = lp_sr_fuse(img1,img2,level,3,3,D,overlap,epsilon);      %LP-SR
         %imgf = rp_sr_fuse(img1,img2,level,3,3,D,overlap,epsilon);     %RP-SR
         %imgf = dwt_sr_fuse(img1,img2,level,D,overlap,epsilon);        %DWT-SR

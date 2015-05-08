@@ -1,4 +1,4 @@
-dir1 = 'fused';
+dir1 = 'fused1';
 a = dir([dir1,'/*.png']); % For filtered images
 % a = dir([dir1,'/*.png']);
 len = length(a);
@@ -19,7 +19,7 @@ im1 = imfilter(im1,fspecial('gaussian',7,1.));
 im1=im2double(im1);
 Sift1=dense_sift(im1,patchsize,gridspacing);
 Im1=im1(patchsize/2:end-patchsize/2+1,patchsize/2:end-patchsize/2+1,:);
-imwrite(Im1,sprintf('fused_reg/Grp%03d.png',1));
+imwrite(Im1,sprintf('fused_reg1/Grp%03d.png',1));
 for cf = 2:len
     
         im2=imread([dir1,'/',a(cf).name]);
@@ -60,6 +60,6 @@ for cf = 2:len
         warpI2=warpImage(Im2,vx,vy);
 %         im1 = warpI2;
         
-        imwrite(warpI2,sprintf('fused_reg/Grp%03d.png',cf));
+        imwrite(warpI2,sprintf('fused_reg1/Grp%03d.png',cf));
    
 end

@@ -1,31 +1,31 @@
 %% Groups frames that are similar
 
 dir2 = 'data/output';
-nFrames = 990;
-gap = 12;
-
-dsFactor = 0.25;
-
-load(sprintf('I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Datasets/Initial Dataset/video/mat/in%06d.mat',1));
-img = imresize(img,0.25);
-imSizeOrig = size(img);
-img = img(gap:imSizeOrig(1)-gap,gap:imSizeOrig(2)-gap,:);
-imSize = size(img);
-dataSize = [imSize(1)*imSize(2),imSize(3)];
-rowmat = repmat([1:imSize(1)]',[1,imSize(2)]);
-colmat = repmat([1:imSize(2)],[imSize(1),1]);
-h2 = strel('disk',3);
-hh = fspecial('sobel');
-data = zeros(dataSize);
-datahsv = zeros(dataSize);
-img2 = img;
-k = 2;
-radii = 15:1:40;
-radiiGap = 1;
-fc = 0;
-blankImg = uint8(255*ones(255,255));
-
-thresh = 2.5;
+% nFrames = 990;
+% gap = 12;
+% 
+% dsFactor = 0.25;
+% 
+% load(sprintf('I:/Postdoctoral Works/From Sina/Project - Neonatal Eye/Datasets/Initial Dataset/video/mat/in%06d.mat',1));
+% img = imresize(img,0.25);
+% imSizeOrig = size(img);
+% img = img(gap:imSizeOrig(1)-gap,gap:imSizeOrig(2)-gap,:);
+% imSize = size(img);
+% dataSize = [imSize(1)*imSize(2),imSize(3)];
+% rowmat = repmat([1:imSize(1)]',[1,imSize(2)]);
+% colmat = repmat([1:imSize(2)],[imSize(1),1]);
+% h2 = strel('disk',3);
+% hh = fspecial('sobel');
+% data = zeros(dataSize);
+% datahsv = zeros(dataSize);
+% img2 = img;
+% k = 2;
+% radii = 15:1:40;
+% radiiGap = 1;
+% fc = 0;
+% blankImg = uint8(255*ones(255,255));
+% 
+% thresh = 2.5;
 
 
 %% grouping k-means + hsv correction + bwlabel based rectangle
@@ -173,7 +173,7 @@ for cf = 290:nFrames
                     end
                     prevcf = cf;
                     
-                    imwrite(selectedRegion,sprintf('%s/Grp%03d_img%06d.png',dir2,grp,imgCnt));
+                    imwrite(selectedRegion, sprintf('%s/Grp%03d_img%06d.png',dir2,grp,imgCnt));
                     imwrite(mat2gray(Gtarg),sprintf('%s/Grp%03d_img%06d_o.png',dir2,grp,imgCnt));
                     imgCnt = imgCnt + 1;
 %                     if fc == 1
@@ -206,3 +206,4 @@ for cf = 290:nFrames
     cf
 %     pause(0.01);
 end
+

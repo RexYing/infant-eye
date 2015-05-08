@@ -47,21 +47,36 @@ end
 %   hold on; 
 %   plot([O(:,2);O(1,2)],[O(:,1);O(1,1)]);
 
-%% registration
+%% registration of filtered image
+opt = option_defaults_fa;
+load('sparsefusion/Dictionary/D_100000_256_8.mat');
+overlap = 6;
+epsilon=0.1;
+
 [optimizer,metric] = imregconfig('monomodal');
 optimizer.MaximumIterations = 300;
 optimizer.MaximumStepLength = optimizer.MaximumStepLength / 3;
 
 base = squeeze(stack(1, :, :, :));
+base = filter_image(base(:, :, 1), opt);
 figure
-imshow(uint8(base));
+colormap gray;
+imagesc(base);
+
+filteredStack = zeros(size(stack));
 
 for i = 2: length(bestFrames)
     frame = squeeze(stack(i, :, :, :));
-    registered = imregister(frame(:, :, 1), base(:, :, 1), 'affine', optimizer, metric);
-    imshow(registered, [0, 255]);
-    drawnow;
-    pause(0.5);
+    frame = filter_image(frame(:, :, 1), opt);
+    
+    registered = imregister(frame, base, 'affine', optimizer, metric);
+    imagesc(registered);
+    drawnow; pause(0.5);
+    
+    imgf = lp_sr_fuse(base,registered,level,3,3,D,overlap,epsilon);
+    base = imgf;
+    imagesc(imgf);
+    drawnow; pause(0.5);
     
 %     nonrigidSplineReg(frame(:, :, 1), base(:, :, 1));
     

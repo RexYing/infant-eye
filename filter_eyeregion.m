@@ -10,10 +10,10 @@ response = imfilter(imfilter(img, f1), f2);
 imshow(response);
 
 bw = response > 0.1;
-bwskel = bwmorph(bw,'skel',5);
+% bwskel = bwmorph(bw,'skel',5);
 figure
 colormap gray
-imagesc(bwskel);
+imagesc(bw);
 
 %%
 img = 255 - img;

@@ -14,6 +14,10 @@ SIFTflowpara.wsize=5;
 SIFTflowpara.topwsize=20;
 SIFTflowpara.nIterations=60;
 
+[optimizer, metric] = imregconfig('multimodal');
+optimizer.MaximumIterations = 500;
+optimizer.GrowthFactor = optimizer.GrowthFactor -0.02;
+
 
 
 for cf = 1:len
@@ -47,12 +51,12 @@ for cf = 1:len
         Sift2=dense_sift(im2,patchsize,gridspacing);
         
         % % visualize the SIFT image
-        % figure;imshow(showColorSIFT(Sift1));title('SIFT image 1');
-        % figure;imshow(showColorSIFT(Sift2));title('SIFT image 2');
+%         figure;imshow(showColorSIFT(Sift1));title('SIFT image 1');
+%         figure;imshow(showColorSIFT(Sift2));title('SIFT image 2');
         
         % Step 3. SIFT flow matching
         
-        
+       % warpI2 = imregister(im1, im2, 'affine', optimizer, metric);
         
         tic;[vx,vy,energylist]=SIFTflowc2f(Sift1,Sift2,SIFTflowpara);toc
         
@@ -60,8 +64,27 @@ for cf = 1:len
         Im1=im1(patchsize/2:end-patchsize/2+1,patchsize/2:end-patchsize/2+1,:);
         Im2=im2(patchsize/2:end-patchsize/2+1,patchsize/2:end-patchsize/2+1,:);
         warpI2=warpImage(Im2,vx,vy);
-%         im1 = warpI2;
+        
+        % whether to use the first image as reference or the previous image
+        %im1 = warpI2;
         
         imwrite(warpI2,sprintf('op/Grp%03d_img%06d.png',grp,imgCnt));
     end
 end
+
+%%
+% a = dir([dir1,'/*.png']); % For filtered images
+% len = length(a);
+% w = 220;
+% h =  230;
+% for cf = 1:len
+%     imgName = a(cf).name;
+%     grp = str2double(imgName(4:6));
+%     imgCnt = str2double(imgName(11:16));
+%     
+%     im1=imread([dir1,'/',a(cf).name]);
+%     [imgH, imgW] = size(im1);
+%     if imgW >= w && imgH >= h
+%         imwrite(im1(1:h, 1:w), sprintf('data_grp/%s', a(cf).name));
+%     end
+% end
