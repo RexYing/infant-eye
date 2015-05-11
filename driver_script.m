@@ -32,11 +32,11 @@ frame = imresize(read(movObj, 1), dsFactor);
 % first dimension: image index
 stack = zeros(nFrames, fWidth, fHeight, 3);
 
-for i = 2: nFrames
-    frame = imresize(read(movObj, i), dsFactor);
-    stack(i, :, :, :) = reshape(frame, 1, fWidth, fHeight, 3);
-end
-save('data/frame_data.mat', 'stack', 'fWidth', 'fHeight', 'nFrames', '-v7.3');
+% for i = 2: nFrames
+%     frame = imresize(read(movObj, i), dsFactor);
+%     stack(i, :, :, :) = reshape(frame, 1, fWidth, fHeight, 3);
+% end
+% save('data/frame_data.mat', 'stack', 'fWidth', 'fHeight', 'nFrames', '-v7.3');
 
 %% Identify relavant images
 % color_dist(frame, 'RGB', 'Best frame in RGB space');

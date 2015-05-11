@@ -52,12 +52,14 @@ opt = option_defaults_fa;
 load('sparsefusion/Dictionary/D_100000_256_8.mat');
 overlap = 6;
 epsilon=0.1;
+level=4;
 
 [optimizer,metric] = imregconfig('monomodal');
 optimizer.MaximumIterations = 300;
 optimizer.MaximumStepLength = optimizer.MaximumStepLength / 3;
 
 base = squeeze(stack(1, :, :, :));
+%base = filter_image(uint8(base), opt);
 base = filter_image(base(:, :, 1), opt);
 figure
 colormap gray;
@@ -67,16 +69,17 @@ filteredStack = zeros(size(stack));
 
 for i = 2: length(bestFrames)
     frame = squeeze(stack(i, :, :, :));
+    %frame = filter_image(uint8(frame), opt);
     frame = filter_image(frame(:, :, 1), opt);
     
     registered = imregister(frame, base, 'affine', optimizer, metric);
     imagesc(registered);
-    drawnow; pause(0.5);
+    drawnow; %pause(0.5);
     
     imgf = lp_sr_fuse(base,registered,level,3,3,D,overlap,epsilon);
     base = imgf;
     imagesc(imgf);
-    drawnow; pause(0.5);
+    drawnow; %pause(0.5);
     
 %     nonrigidSplineReg(frame(:, :, 1), base(:, :, 1));
     
@@ -84,3 +87,13 @@ for i = 2: length(bestFrames)
 %     figure
 %     imshowpair(registered(:, :, 1), base(:, :, 1));
 end
+imwrite(imgf, sprintf('frames/fused.tif', i));
+
+segOpt = dijkstra_seg_defaults;
+mask = double(squeeze(eyemask(:, :, 1)));
+%[G, K, imgf2] = filter_image(imgf(:, :,1), opt);
+%Dj_f = dijk_seg(G);
+
+G = filter_image(uint8(mat2gray(imgf)*255), option_defaults);
+Dj_f = dijkstra_segmentation(G, segOpt);
+
