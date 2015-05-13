@@ -2,7 +2,7 @@ function blur = blurMetric(original)
 % original : entry image
 
 % The idea is from "The Blur Effect: Perception and Estimation with a New No-Reference Perceptual Blur Metric"
-% Crété-Roffet F., Dolmiere T., Ladret P., Nicolas M. - GRENOBLE - 2007
+% Crét?Roffet F., Dolmiere T., Ladret P., Nicolas M. - GRENOBLE - 2007
 % In SPIE proceedings - SPIE Electronic Imaging Symposium Conf Human Vision and Electronic Imaging, États-Unis d'Amérique (2007)
 
 % Written by DO Quoc Bao, PhD Student in L2TI Laboratory, Paris 13 University, France
@@ -16,7 +16,7 @@ function blur = blurMetric(original)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 I = double(original);
-[y x] = size(I);
+[y, x] = size(I);
 
 Hv = [1 1 1 1 1 1 1 1 1]/9;
 Hh = Hv';
@@ -24,11 +24,63 @@ Hh = Hv';
 B_Ver = imfilter(I,Hv);%blur the input image in vertical direction
 B_Hor = imfilter(I,Hh);%blur the input image in horizontal direction
 
-D_F_Ver = abs(I(:,1:x-1) - I(:,2:x));%variation of the input image (vertical direction)
-D_F_Hor = abs(I(1:y-1,:) - I(2:y,:));%variation of the input image (horizontal direction)
+wSize = 9;
+vRange = zeros(y, 2);
+for i = 1: y
+    ind = find(I(:, i), 1);
+    if ~isempty(ind)
+        vRange(i, 1) = ind + wSize;
+    end
+    ind = find(I(:, i), 1, 'last');
+    if ~isempty(ind)
+        vRange(i, 2) = ind - wSize;
+    end
+end
+hRange = zeros(x, 2);
+for i = 1: x
+    ind = find(I(i, :), 1);
+    if ~isempty(ind)
+        hRange(i, 1) = ind + wSize;
+    end
+    ind = find(I(i, :), 1, 'last');
+    if ~isempty(ind)
+        hRange(i, 2) = ind - wSize;
+    end
+end
 
-D_B_Ver = abs(B_Ver(:,1:x-1)-B_Ver(:,2:x));%variation of the blured image (vertical direction)
-D_B_Hor = abs(B_Hor(1:y-1,:)-B_Hor(2:y,:));%variation of the blured image (horizontal direction)
+function D = vDiff(I)
+    D = zeros(size(I));
+    for iCol = 1: y
+        if vRange(iCol, 1) ~= 0 || vRange(iCol, 2) ~= 0
+            ind1 = vRange(iCol, 1);
+            ind2 = vRange(iCol, 2);
+            D(:, ind1: ind2-1) = abs(I(:, ind1: (ind2 - 1)) - I(:, (ind1 + 1): ind2));
+        end
+    end
+end
+
+function D = hDiff(I)
+    D = zeros(size(I));
+    for iRow = 1: x
+        if hRange(iRow, 1) ~= 0 || hRange(iRow, 2) ~= 0
+            ind1 = hRange(iRow, 1);
+            ind2 = hRange(iRow, 2);
+            D(ind1: ind2-1, :) = abs(I(ind1: (ind2 - 1), :) - I((ind1 + 1): ind2, :));
+        end
+    end
+end
+
+ D_F_Ver = vDiff(I);
+ D_F_Hor = hDiff(I);
+
+% D_F_Ver = abs(I(:,1:x-1) - I(:,2:x));%variation of the input image (vertical direction)
+% D_F_Hor = abs(I(1:y-1,:) - I(2:y,:));%variation of the input image (horizontal direction)
+
+D_B_Ver = vDiff(B_Ver);
+D_B_Hor = hDiff(B_Hor);
+
+% D_B_Ver = abs(B_Ver(:,1:x-1)-B_Ver(:,2:x));%variation of the blured image (vertical direction)
+% D_B_Hor = abs(B_Hor(1:y-1,:)-B_Hor(2:y,:));%variation of the blured image (horizontal direction)
 
 T_Ver = D_F_Ver - D_B_Ver;%difference between two vertical variations of 2 image (input and blured)
 T_Hor = D_F_Hor - D_B_Hor;%difference between two horizontal variations of 2 image (input and blured)
@@ -47,3 +99,4 @@ blur_F_Hor = (S_D_Hor-S_V_Hor)/S_D_Hor;
 
 blur = max(blur_F_Ver,blur_F_Hor);
 
+end
