@@ -27,9 +27,9 @@ sum(s_map1(:) == 0)
 fileInfo = dir([dirIn,'/*.png']);
 nImgs = length(fileInfo);
 
-blurMetricThreshold = 3.3;
+blurMetricThreshold = 0.32;
 for i = 1:nImgs
-    filename = fileInfo(i).name;
+    filename = fileInfo(i).name
     img=imread([dirIn,'/', filename]);
     
     filename = filename(1: end-4); % no extension .png
