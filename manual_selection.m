@@ -59,8 +59,8 @@ optimizer.MaximumIterations = 300;
 optimizer.MaximumStepLength = optimizer.MaximumStepLength / 3;
 
 base = squeeze(stack(1, :, :, :));
-%base = filter_image(uint8(base), opt);
-base = filter_image(base(:, :, 1), opt);
+base = filter_image(uint8(base), opt);
+%base = filter_image(base(:, :, 1), opt);
 figure
 colormap gray;
 imagesc(base);
@@ -69,8 +69,8 @@ filteredStack = zeros(size(stack));
 
 for i = 2: length(bestFrames)
     frame = squeeze(stack(i, :, :, :));
-    %frame = filter_image(uint8(frame), opt);
-    frame = filter_image(frame(:, :, 1), opt);
+    frame = filter_image(uint8(frame), opt);
+    %frame = filter_image(frame(:, :, 1), opt);
     
     registered = imregister(frame, base, 'affine', optimizer, metric);
     imagesc(registered);
@@ -96,4 +96,4 @@ mask = double(squeeze(eyemask(:, :, 1)));
 
 G = filter_image(uint8(mat2gray(imgf)*255), option_defaults);
 Dj_f = dijkstra_segmentation(G, segOpt);
-
+imwrite(Dj_f, 'segmented_image_good_frames');
