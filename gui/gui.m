@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 24-May-2015 23:07:37
+% Last Modified by GUIDE v2.5 01-Jun-2015 01:34:05
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -204,22 +204,112 @@ function locateEyeRegionButton_Callback(hObject, eventdata, handles)
 switch get(handles.textFrameSelectionThresh, 'Enable')
     case 'on'
         outputDir = uigetdir;
+        handles.outputDir = outputDir;
+        
         mkdir(outputDir, handles.defaultEyeRegionOutputDir);
         path = fullfile(outputDir, handles.defaultEyeRegionOutputDir);
         
-        extractEyeRegion(handles.video, path);
-        msg(sprintf('Eye region images have been written into %s', path));
+        mkdir(outputDir, handles.defaultSelectedOutputDir);
+        selectedFramesPath = fullfile(outputDir, handles.defaultSelectedOutputDir);
+        
+        contents = cellstr(get(handles.frameSelectionFeaturePopup,'String'));
+        criterion = contents{get(handles.frameSelectionFeaturePopup,'Value')};
+        thresh = str2double(get(handles.textFrameSelectionThresh, 'String'));
+        
+        handles.extracted = true;
+        handles.extractedNumImgs = ...
+            extractEyeRegion(handles.video, path, criterion, thresh, selectedFramesPath);
+        
+        msgbox(sprintf('Selected eye region images have been written into %s', ...
+            selectedFramesPath));
+        
+        % change display 
+        %imshow( readFrame(handles.video), 'Parent', handles.origImg);
+        
     otherwise
         msgbox('Please select a frame selection feature criteria');
 end
+guidata(hObject, handles);
 
 
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
+% --- Executes on button press in registerButton.
+function registerButton_Callback(hObject, eventdata, handles)
+% hObject    handle to registerButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if ~exist('handles.outputDir', 'var')
+    handles.outputDir = uigetdir;
+end
+outputDir = handles.outputDir;
+selectedFramesPath = fullfile(outputDir, handles.defaultSelectedOutputDir);
 
+mkdir(outputDir, handles.defaultRegisteredOutputDir);
+mkdir(outputDir, [handles.defaultRegisteredOutputDir, '_filtered']);
+registerPath = fullfile(outputDir, handles.defaultRegisteredOutputDir);
+
+if ~handles.extracted
+    msgbox('Please locate eye region first');
+else
+    handles.registeredNumImgs = registerEyeRegion(selectedFramesPath, registerPath);
+    msgbox(sprintf('Registered images have been written into %s', registerPath));
+    
+    % update slider
+    handles.showRegistered = true;
+    set(handles.movieSlider, 'Value', 1);
+    set(handles.movieSlider, 'Min', 1);
+    set(handles.movieSlider, 'Max',  handles.registeredNumImgs);
+    set(handles.movieSlider, 'SliderStep', [1/(handles.registeredNumImgs-1) , 1/(handles.registeredNumImgs-1)] );
+    
+    a = dir([registerPath,'/*.png']); % For filtered images
+    img = imread([registerPath, '/', a(1).name]);
+    imshow(img, 'Parent', handles.origImg);
+end
+guidata(hObject, handles);
+
+% --- Executes on button press in fuseButton.
+function fuseButton_Callback(hObject, eventdata, handles)
+if ~exist('handles.outputDir', 'var')
+    handles.outputDir = uigetdir;
+end
+outputDir = handles.outputDir;
+registerPath = fullfile(outputDir, handles.defaultRegisteredOutputDir);
+
+mkdir(outputDir, handles.defaultRegisteredOutputDir);
+fusePath = fullfile(outputDir, handles.defaultFusedOutputDir);
+
+if ~handles.extracted
+    msgbox('Please locate eye region first');
+else
+    [imgo, imgf] = fuse(registerPath, fusePath);
+    msgbox(sprintf('Fused images have been written into %s', fusePath));
+    
+    imshow(imgo, 'Parent', handles.origImg);
+    imshow(imgf, 'Parent', handles.finalImg);
+    
+    handles.imgf = imgf;
+    % update slider
+    
+%     set(handles.movieSlider, 'Value', 1);
+%     set(handles.movieSlider, 'Min', 1);
+%     set(handles.movieSlider, 'Max',  handles.registeredNumImgs);
+%     set(handles.movieSlider, 'SliderStep', [1/(handles.registeredNumImgs-1) , 1/(handles.registeredNumImgs-1)] );
+    
+%     a = dir([registerPath,'/*.png']); % For filtered images
+%     img = imread([registerPath, '/', a(1).name]);
+%     imshow(img, 'Parent', handles.origImg);
+end
+guidata(hObject, handles);
+
+
+% --- Executes on button press in segmentButton.
+function segmentButton_Callback(hObject, eventdata, handles)
+
+%imgSeg = filter_image(uint8(mat2gray(handles.imgf)*255), option_defaults);
+imgf = filter_image(uint8(handles.imgf), option_defaults);
+segOpt = dijkstra_seg_defaults;
+imgSeg = dijkstra_segmentation(imgf, segOpt);
+
+imshow(imgSeg, 'Parent', handles.finalImg);
 
 % --- Executes on slider movement.
 
@@ -235,11 +325,19 @@ end
 
 
 function movieSlider_Callback(hObject, eventdata, handles)
-handles.currentFrame = round(get(hObject,'Value'));
-handles.video.CurrentTime = (handles.currentFrame - 1) / handles.video.FrameRate;
-handles.currentFrame = round(get(hObject,'Value'));
-imshow(readFrame(handles.video), 'Parent', handles.origImg);
-
+if (handles.showRegistered)
+    idx = round(get(hObject,'Value'));
+    
+    registerPath = fullfile(handles.outputDir, handles.defaultRegisteredOutputDir);
+    a = dir([registerPath,'/*.png']); % For filtered images
+    img = imread([registerPath, '/', a(idx).name]);
+    imshow(img, 'Parent', handles.origImg);
+else
+    handles.currentFrame = round(get(hObject,'Value'));
+    handles.video.CurrentTime = (handles.currentFrame - 1) / handles.video.FrameRate;
+    imshow(readFrame(handles.video), 'Parent', handles.origImg);
+end
+guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function openVideo_ClickedCallback(hObject, eventdata, handles)
@@ -302,3 +400,39 @@ function textFrameSelectionThresh_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+function gotoEditText_Callback(hObject, eventdata, handles)
+% hObject    handle to gotoEditText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gotoEditText as text
+%        str2double(get(hObject,'String')) returns contents of gotoEditText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gotoEditText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gotoEditText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in gotoButton.
+function gotoButton_Callback(hObject, eventdata, handles)
+% hObject    handle to gotoButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.currentFrame = str2double(get(handles.gotoEditText,'String'));
+handles.video.CurrentTime = (handles.currentFrame - 1) / handles.video.FrameRate;
+imshow(readFrame(handles.video), 'Parent', handles.origImg);
+
+
+

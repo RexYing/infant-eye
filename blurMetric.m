@@ -16,7 +16,7 @@ function blur = blurMetric(original)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 I = double(original);
-[y, x] = size(I);
+[x, y] = size(I);
 
 Hv = [1 1 1 1 1 1 1 1 1]/9;
 Hh = Hv';

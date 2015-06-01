@@ -69,6 +69,8 @@ for cf = 1:len
         %im1 = warpI2;
         
         imwrite(warpI2,sprintf('op/Grp%03d_img%06d.png',grp,imgCnt));
+        
+        filter_image(selectedRegion,opt);
     end
 end
 
